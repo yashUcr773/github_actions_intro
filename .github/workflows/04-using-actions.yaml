@@ -8,5 +8,7 @@ jobs:
         steps:
             - name: Checkout Code
               uses: actions/checkout@v4
+            - name: cd repo
+              run: cd react-app
             - name: print_folders
               run: ls -a
