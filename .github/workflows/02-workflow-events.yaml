@@ -1,13 +1,6 @@
 name: 02-workflow-events
 on:
-  push:
   workflow_dispatch:
-  issues:
-    types: [opened]
-  schedule:
-    - cron: '*/5 * * * *'
-  pull_request:
-    types: [opened, reopened]
 
 jobs:
   event_name:
