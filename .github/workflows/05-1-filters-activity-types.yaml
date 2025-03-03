@@ -5,7 +5,7 @@ on:
     pull_request: 
         types: [opened, synchronize]
         branches: 
-            - master
+            - never-exists
 
 jobs:
     main:
