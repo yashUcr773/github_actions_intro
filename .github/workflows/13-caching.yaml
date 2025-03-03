@@ -22,9 +22,6 @@ jobs:
             run:
                 working-directory: react-app
         steps:
-            - name: ls
-              run: ls -a
-
             - name: Checkout Code
               uses: actions/checkout@v4
             
@@ -40,13 +37,7 @@ jobs:
               with: 
                   key: deps-node-modules-${{hashFiles('react-app/package-lock.json')}}
                   path: react-app/node_modules
-
-            - name: ls
-              run: ls -a
             
-            - name: pwd
-              run: $pwd
-
             - name: Install dependencies
               if: ${{steps.cache.outputs.cache-hit == 'true'}}
               run: npm ci
