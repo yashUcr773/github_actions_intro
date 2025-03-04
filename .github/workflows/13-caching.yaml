@@ -34,7 +34,7 @@ jobs:
 
       - name: Calculate cache key
         id: cache_key
-        run: echo CACHE_KEY=deps-node-modules-${{ hashFiles('react-app/package-lock.json') }} >> $GITHUB_OUTPUT
+        run: echo CACHE_KEY=deps-node-modules-${{ hashFiles('react-app/package-lock.json') }}=${{ inputs.node-version }} >> $GITHUB_OUTPUT
 
       - name: Download cached dependencies
         id: cache
