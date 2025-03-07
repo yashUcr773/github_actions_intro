@@ -14,8 +14,11 @@ jobs:
                 os: [ubuntu-latest, windows-latest]
                 include:
                     - os: ubuntu-latest
-                      node-version: 21.x
                       tag: experimental
+
+                    - node-version: 21.x
+                      tag: experimental
+                      
                     - os: ubuntu-latest
                       node-version: 16.x
         steps:
