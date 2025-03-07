@@ -5,7 +5,7 @@ on:
 
 jobs:
     backwards-compatibility:
-        name: ${{matrix.os}}-${{matrix.node-version}}
+        name: ${{matrix.os}}-${{matrix.node-version}}-${{matrix.tag}}
         runs-on: ${{matrix.os}}
         strategy:
             fail-fast: false
@@ -18,7 +18,7 @@ jobs:
 
                     - node-version: 21.x
                       tag: experimental
-                      
+
                     - os: ubuntu-latest
                       node-version: 16.x
         steps:
