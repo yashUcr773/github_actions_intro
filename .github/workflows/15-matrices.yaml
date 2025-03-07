@@ -8,7 +8,7 @@ jobs:
         name: ${{matrix.os}}-${{matrix.node-version}}-${{matrix.tag}}
         runs-on: ${{matrix.os}}
         strategy:
-            fail-fast: false
+            fail-fast: true
             matrix:
                 node-version: [18.x, 20.x, 21.x]
                 os: [ubuntu-latest, windows-latest]
