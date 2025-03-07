@@ -4,40 +4,6 @@ on:
     workflow_dispatch: 
 
 jobs:
-    # backwards-compatibility:
-    #     name: ${{matrix.os}}-${{matrix.node-version}}-${{matrix.tag}}
-    #     runs-on: ${{matrix.os}}
-    #     strategy:
-    #         fail-fast: true
-    #         matrix:
-    #             node-version: [18.x, 20.x, 21.x]
-    #             os: [ubuntu-latest, windows-latest]
-    #             include:
-    #                 - os: ubuntu-latest
-    #                   tag: experimental
-
-    #                 - node-version: 21.x
-    #                   tag: experimental
-
-    #                 - os: ubuntu-latest
-    #                   node-version: 16.x
-    #     steps:
-    #         - name: Setup Node
-    #           uses: actions/setup-node@v3
-    #           with:
-    #             node-version: ${{matrix.node-version}}
-
-    #         - name: Perform some tests
-    #           run: |
-    #             sleep 10 && echo "Running tests on OS ${{matrix.os}} and NodeJS ${{matrix.node-version}}"
-
-    #         - name: Upload test results
-    #           run: echo "Uploading test results"
-
-    #         - name: Fail if experimental
-    #           if: ${{matrix.tag == 'experimental'}}
-    #           run: exit 1
-    
     include-example:
         runs-on: ubuntu-latest
         name: ${{matrix.color}}-${{matrix.shape}}-${{matrix.size}}-${{matrix.opacity}}
@@ -54,8 +20,12 @@ jobs:
               - color: red
                 shape: triangle
               - opacity: 50
+              - color: green
+                shape: circle
+                size: medium
             exclude:
-              - opacity: 75
+              - color: green
+              - shape: circle
             
         steps:
           - name: Dummy step
