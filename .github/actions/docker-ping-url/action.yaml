@@ -9,7 +9,7 @@ inputs:
     description: Time in seconds to wait between trials
     required: false
     default: 5
-  max_trails:
+  max_trials:
     description: maximum number of trials
     default: 5
     required: false
