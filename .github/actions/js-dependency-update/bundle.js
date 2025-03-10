@@ -23854,7 +23854,7 @@ var core = require_core();
 var exec = require_exec();
 var github = require_github();
 var validateBranchName = ({ branchName }) => {
-  const regex = /^[a-zA-Z0-9_-\.\/]+$/;
+  const regex = /^[a-zA-Z0-9_\-\.\/]+$/;
   return regex.test(branchName);
 };
 async function run() {
