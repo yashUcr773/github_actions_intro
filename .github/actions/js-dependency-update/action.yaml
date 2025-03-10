@@ -6,3 +6,21 @@ runs:
   using: node20
   main: bundle.js
 
+inputs:
+  base-branch:
+    description: The branch to be used as the base for the dependency update checks
+    default: main
+    required: false
+
+  target-branch:
+    description: The branch from which the PR is created
+    default: update-dependencies
+    required: false
+  
+  working-directory:
+    description: The working directory of the project to check for dependency updates.
+    required: true
+  
+  gh-token:
+    description: Authentication token with repository access. Must have write and pull-request access.
+    required: true
