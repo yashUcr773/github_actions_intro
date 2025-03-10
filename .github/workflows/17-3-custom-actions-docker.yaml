@@ -7,9 +7,9 @@ on:
           type: string
           required: true
         delay:
-          description: Time in s to wait between trials
+          description: Time in seconds to wait between trials
           required: false
-          default: '10'
+          default: '5'
         max_trails:
           description: maximum number of trials
           default: '5'

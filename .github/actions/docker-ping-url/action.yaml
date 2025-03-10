@@ -6,7 +6,7 @@ inputs:
     description: URL to ping
     required: true
   delay:
-    description: Time in s to wait between trials
+    description: Time in seconds to wait between trials
     required: false
     default: 5
   max_trails:

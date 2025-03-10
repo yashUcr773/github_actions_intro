@@ -25,8 +25,8 @@ def ping_url(url, delay, max_trials):
 
 def run():
     website_url=os.getenv("INPUT_URL")
-    delay=os.getenv("INPUT_DELAY")
-    max_trails=os.getenv("INPUT_MAX_TRIALS")
+    delay=int(os.getenv("INPUT_DELAY"))
+    max_trails=int(os.getenv("INPUT_MAX_TRIALS"))
 
     website_reachable = ping_url(website_url, delay, max_trails)
 
