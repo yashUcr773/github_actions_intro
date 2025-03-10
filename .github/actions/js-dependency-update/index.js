@@ -3,7 +3,7 @@ const exec = require("@actions/exec");
 const github = require("@actions/github");
 
 const validateBranchName = ({ branchName }) => {
-  const regex = /^[a-zA-Z0-9_\.\/]+$/;
+  const regex = /^[a-zA-Z0-9_-\.\/]+$/;
   return regex.test(branchName);
 };
 
