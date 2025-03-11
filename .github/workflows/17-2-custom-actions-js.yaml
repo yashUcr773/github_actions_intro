@@ -27,11 +27,16 @@ jobs:
 
             - name: Check for dependency updates
               uses: ./.github/actions/js-dependency-update
+              id: updates-step
               with:
                 base-branch: ${{ inputs.base-branch }}
                 target-branch: ${{ inputs.target-branch }}
                 working-directory: ${{ inputs.working-directory }}
                 gh-token: ${{ secrets.GITHUB_TOKEN }}
+            
+            - name: Print custom action output
+              run: | 
+                echo "Updates Available: ${{steps.updates-step.outputs.updates-available}}"
               
             
             

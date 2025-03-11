@@ -23887,7 +23887,9 @@ async function run() {
       cwd: workingDirectory
     }
   );
+  let updatesAvailable = false;
   if (gitStatus.stdout.length > 0) {
+    updatesAvailable = true;
     core.info("[js-dependency-update]: There are some updates available!");
     await exec.exec('git config --global user.name "PR_BOT"');
     await exec.exec('git config --global user.email "PR_BOT@email.com"');
@@ -23923,6 +23925,7 @@ async function run() {
   } else {
     core.info("[js-dependency-update]: There are no updates available!");
   }
+  core.setOutput("updates-available", updatesAvailable);
 }
 run();
 /*! Bundled license information:

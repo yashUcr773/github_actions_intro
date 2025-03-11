@@ -24,3 +24,8 @@ inputs:
   gh-token:
     description: Authentication token with repository access. Must have write and pull-request access.
     required: true
+
+outputs:
+  updates-available:
+    description: Boolean to indicate id updates are available or not
+    
