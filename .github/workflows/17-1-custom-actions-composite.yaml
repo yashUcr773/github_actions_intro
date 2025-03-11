@@ -27,11 +27,17 @@ jobs:
   
             - name: Setup Node and NPM Dependencies
               uses: ./.github/actions/composite-cache-deps
+              id: setup-node
               with:
                 node-version: 20.x
                 working-directory: ${{env.working-directory}}
                 target-env: ${{inputs.target-env}}
             
+            - name: Print Outputs
+              run: |
+                echo "Installed dependencies: ${{ steps.setup-node.outputs.installed-deps }}"
+                echo "Random Output: ${{ steps.setup-node.outputs.random-output }}"
+
             - name: Test
               run: npm run test
             
