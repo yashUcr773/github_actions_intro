@@ -24,7 +24,12 @@ jobs:
 
             - name: Pings URL
               uses: ./.github/actions/docker-ping-url
+              id: ping-url
               with:
                 url: ${{inputs.url}}
                 delay: ${{inputs.delay}}
                 max_trails: ${{inputs.max_trials}}
+            
+            - name: Print Custom URL
+              run: |
+                echo "Website Reachable: ${{ steps.ping-url.outputs.website-reachable }}"
