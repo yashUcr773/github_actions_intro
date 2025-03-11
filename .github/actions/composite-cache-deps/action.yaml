@@ -46,4 +46,5 @@ runs:
 
     - name: Random Output
       id: random-output
+      shell: bash
       run: echo "random-output=123" >> "$GITHUB_OUTPUT"
