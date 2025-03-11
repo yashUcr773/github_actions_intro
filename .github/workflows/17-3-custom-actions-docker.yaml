@@ -27,4 +27,4 @@ jobs:
               with:
                 url: ${{inputs.url}}
                 delay: ${{inputs.delay}}
-                max_trails: ${{inputs.max_trails}}
+                max_trails: ${{inputs.max_trials}}
