@@ -1,0 +1,171 @@
+name: create-installers-npm-cache
+run-name: create-installers-npm-cache | ENV:${{ inputs.build_env }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      build_env:
+        description: 'Select the environment'
+        required: true
+        default: thor
+        type: choice
+        options:
+          - thor
+          - qa
+          - rel
+          - prod
+          - hfx
+          - alpha
+          - dev
+      include_windows:
+        description: 'Include Windows build'
+        required: true
+        type: boolean
+        default: false
+      include_macos:
+        description: 'Include macOS build'
+        required: true
+        type: boolean
+        default: false
+      include_linux:
+        description: 'Include Linux build'
+        required: true
+        type: boolean
+        default: false
+      dev_branch:
+        description: 'Branch to trigger dev build. Only works if env is dev.'
+        required: false
+        type: string
+        
+env:
+  DESKTOP_APP_REALM: ${{ secrets.DESKTOP_APP_REALM }}
+  DESKTOP_APP_ENVIRONMENT_DLS_NAME: ${{ secrets.DESKTOP_APP_ENVIRONMENT_DLS_NAME }}
+  APPLEID: ${{ secrets.APPLEID }}
+  APPLEIDPASS: ${{ secrets.APPLEIDPASS }}
+  APPLETEAMID: ${{ secrets.APPLETEAMID }}
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  BOOK_CONFIG_ID: ${{ secrets.BOOK_CONFIG_ID }}
+  BOOK_CONFIG_VALUE: ${{ secrets.BOOK_CONFIG_VALUE }}
+  CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
+  CSC_LINK: ${{ secrets.CSC_LINK }}
+  CSC_WIN_BASE64: ${{ secrets.CSC_WIN_BASE64 }}
+  DESKTOP_APP_ENVIRONMENT: ${{ secrets.DESKTOP_APP_ENVIRONMENT }}
+  ELECTRON_BUILDER_ALLOW_UNRESOLVED_DEPENDENCIES: ${{ secrets.ELECTRON_BUILDER_ALLOW_UNRESOLVED_DEPENDENCIES }}
+  WIN_CSC_KEY_PASSWORD: ${{ secrets.WIN_CSC_KEY_PASSWORD }}
+  WIN_CSC_LINK: ${{ secrets.WIN_CSC_LINK }}
+
+jobs:
+  set-matrix:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+      selected_os: ${{ steps.set-matrix.outputs.selected_os }}
+    steps:
+      - id: set-matrix
+        run: |
+          OS_LIST=()
+          OS_NAMES=()
+          if [[ "${{ inputs.include_linux }}" == "true" ]]; then
+            OS_LIST+=("ubuntu-latest")
+            OS_NAMES+=("Linux")
+          fi
+          if [[ "${{ inputs.include_windows }}" == "true" ]]; then
+            OS_LIST+=("windows-latest")
+            OS_NAMES+=("Windows")
+          fi
+          if [[ "${{ inputs.include_macos }}" == "true" ]]; then
+            OS_LIST+=("macos-13")
+            OS_NAMES+=("macOS")
+          fi
+
+          # Create JSON-safe list of quoted strings
+          OS_JSON=$(printf '"%s",' "${OS_LIST[@]}")
+          OS_JSON="[${OS_JSON%,}]"  # remove trailing comma
+
+          echo "matrix={\"os\":$OS_JSON}" >> $GITHUB_OUTPUT
+          echo "selected_os=$(IFS=, ; echo "${OS_NAMES[*]}")" >> $GITHUB_OUTPUT
+
+  checkout-private-repo:
+    needs: set-matrix
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.set-matrix.outputs.matrix) }}
+    environment: ${{ inputs.build_env }}
+    defaults:
+      run:
+        working-directory: private-repo-folder
+    steps:
+      - name: Checkout the main repository
+        uses: actions/checkout@v4
+
+      - name: Checkout a private repository from another organization
+        uses: actions/checkout@v4
+        with:
+          repository: compro-cup-central/nemo-micro-foc
+          token: ${{ secrets.GH_PAT }}
+          path: private-repo-folder
+          ref: ${{ inputs.build_env != 'dev' && format('desktop-env/{0}', inputs.build_env) || inputs.dev_branch }}
+
+      - name: Log latest commit message from the private repo
+        run: git log -1 --pretty=format:"%h - %s (%an)"
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.12.0
+
+      - name: Cache npm dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: Install OS-specific dependencies
+        run: |
+          if [[ "${{ matrix.os }}" == "macos-13" ]]; then
+            npm i @rollup/rollup-darwin-x64
+            npm i bufferutil --save-optional --legacy-peer-deps
+            npm i utf-8-validate --save-optional --legacy-peer-deps
+            npm install canvas --save-optional --legacy-peer-deps
+            npm install dmg-license@1.0.11
+          elif [[ "${{ matrix.os }}" == "ubuntu-latest" ]]; then
+            npm i @rollup/rollup-linux-x64-gnu
+          elif [[ "${{ matrix.os }}" == "windows-latest" ]]; then
+            npm install --global node-gyp@latest
+            choco install windows-sdk-10.1 --yes
+            powershell.exe -Command 'Set-ExecutionPolicy -ExecutionPolicy Unrestricted -Scope LocalMachine'
+            npm i electron-rebuild --save-dev --legacy-peer-deps
+          fi
+          npm i uglify-js --legacy-peer-deps
+        shell: bash
+
+      - name: Install common dependencies
+        run: |
+          npm ci --legacy-peer-deps
+        shell: bash
+
+      - name: Uglify code
+        run: npm run electron:uglify
+
+      - name: Update book config
+        run: npm run update-book-config
+
+      - name: Release Mac
+        if: matrix.os == 'macos-13'
+        run: npm run electron:release --mac
+
+      - name: Release Linux
+        if: matrix.os == 'ubuntu-latest'
+        run: npm run electron:release --linux
+
+      - name: Release Windows
+        if: matrix.os == 'windows-latest'
+        run: |
+          powershell.exe -File ./scripts/electron-builder/nsis_code_sign_github_actions.ps1
+          npm run electron:release --win
+        shell: powershell
